@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Evaluación por Áreas (Supabase)</title>
+    <!-- 1. Importar el cliente de Supabase desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        fieldset {
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+        legend {
+            font-weight: bold;
+            color: #1e293b;
+            padding: 0 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input[type="text"], input[type="tel"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .question {
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+        .options-scale {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.85em;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-export {
+            background-color: #16a34a;
+            margin-top: 15px;
+            margin-right: 10px;
+        }
+        .btn-export:hover {
+            background-color: #15803d;
+        }
+        .btn-delete {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .btn-delete:hover {
+            background-color: #b91c1c;
+        }
+        .btn-clear-all {
+            background-color: #64748b;
+            margin-top: 15px;
+        }
+        .btn-clear-all:hover {
+            background-color: #475569;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Cuestionario de Evaluación y Selección</h1>
+    <p>Escala de evaluación: <strong>1 (Es pésimo)</strong> | <strong>2 (Bueno)</strong> | <strong>3 (Regular)</strong> | <strong>4 (Excelente)</strong> | <strong>5 (Perfecto)</strong></p>
+
+    <form id="evalForm">
+        <!-- DATOS GENERALES -->
+        <fieldset>
+            <legend>Datos Generales</legend>
+            <div class="form-group">
+                <label for="nombre">Nombre Completo:</label>
+                <input type="text" id="nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="control">Número de Control:</label>
+                <input type="text" id="control" required>
+            </div>
+            <div class="form-group">
+                <label for="carrera">Carrera:</label>
+                <select id="carrera" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Sistemas">Sistemas</option>
+                    <option value="Mecatrónica">Mecatrónica</option>
+                    <option value="Gestión">Gestión</option>
+                    <option value="Industrial">Industrial</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="motivo">Motivo:</label>
+                <input type="text" id="motivo" placeholder="Ej. Voluntariado, Cuestión de calificación..." required>
+            </div>
+            <div class="form-group">
+                <label for="quienMando">¿Quién los mandó?:</label>
+                <input type="text" id="quienMando" placeholder="Ej. Nombre del profesor, departamento..." required>
+            </div>
+            <div class="form-group">
+                <label for="turno">Turno:</label>
+                <select id="turno" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Matutino">Matutino</option>
+                    <option value="Vespertino">Vespertino</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="celular">Número de Celular:</label>
+                <input type="tel" id="celular" required>
+            </div>
+        </fieldset>
+
+        <!-- MARKETING -->
+        <fieldset>
+            <legend>Marketing</legend>
+            <div class="question">
+                <label>1. Experiencia utilizando aplicaciones de diseño (Canva, PowerPoint, IA, etc.):</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="m1" value="1" required> 1</label>
+                    <label><input type="radio" name="m1" value="2"> 2</label>
+                    <label><input type="radio" name="m1" value="3"> 3</label>
+                    <label><input type="radio" name="m1" value="4"> 4</label>
+                    <label><input type="radio" name="m1" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>2. Nivel en la computación:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="m2" value="1" required> 1</label>
+                    <label><input type="radio" name="m2" value="2"> 2</label>
+                    <label><input type="radio" name="m2" value="3"> 3</label>
+                    <label><input type="radio" name="m2" value="4"> 4</label>
+                    <label><input type="radio" name="m2" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>3. Gestión en redes sociales:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="m3" value="1" required> 1</label>
+                    <label><input type="radio" name="m3" value="2"> 2</label>
+                    <label><input type="radio" name="m3" value="3"> 3</label>
+                    <label><input type="radio" name="m3" value="4"> 4</label>
+                    <label><input type="radio" name="m3" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>4. Habilidad para crear una página web:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="m4" value="1" required> 1</label>
+                    <label><input type="radio" name="m4" value="2"> 2</label>
+                    <label><input type="radio" name="m4" value="3"> 3</label>
+                    <label><input type="radio" name="m4" value="4"> 4</label>
+                    <label><input type="radio" name="m4" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>5. Nivel de trabajar con presión:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="m5" value="1" required> 1</label>
+                    <label><input type="radio" name="m5" value="2"> 2</label>
+                    <label><input type="radio" name="m5" value="3"> 3</label>
+                    <label><input type="radio" name="m5" value="4"> 4</label>
+                    <label><input type="radio" name="m5" value="5"> 5</label>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- FINANZAS -->
+        <fieldset>
+            <legend>Finanzas</legend>
+            <div class="question">
+                <label>1. Nivel de ocupar Excel:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="f1" value="1" required> 1</label>
+                    <label><input type="radio" name="f1" value="2"> 2</label>
+                    <label><input type="radio" name="f1" value="3"> 3</label>
+                    <label><input type="radio" name="f1" value="4"> 4</label>
+                    <label><input type="radio" name="f1" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>2. Nivel de análisis y comprensión:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="f2" value="1" required> 1</label>
+                    <label><input type="radio" name="f2" value="2"> 2</label>
+                    <label><input type="radio" name="f2" value="3"> 3</label>
+                    <label><input type="radio" name="f2" value="4"> 4</label>
+                    <label><input type="radio" name="f2" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>3. Transparencia en las finanzas:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="f3" value="1" required> 1</label>
+                    <label><input type="radio" name="f3" value="2"> 2</label>
+                    <label><input type="radio" name="f3" value="3"> 3</label>
+                    <label><input type="radio" name="f3" value="4"> 4</label>
+                    <label><input type="radio" name="f3" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>4. Saber hacer un presupuesto:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="f4" value="1" required> 1</label>
+                    <label><input type="radio" name="f4" value="2"> 2</label>
+                    <label><input type="radio" name="f4" value="3"> 3</label>
+                    <label><input type="radio" name="f4" value="4"> 4</label>
+                    <label><input type="radio" name="f4" value="5"> 5</label>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- RECURSOS HUMANOS (RH) -->
+        <fieldset>
+            <legend>Recursos Humanos (RH)</legend>
+            <div class="question">
+                <label>1. Manejo de emociones al hablar frente al público:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="rh1" value="1" required> 1</label>
+                    <label><input type="radio" name="rh1" value="2"> 2</label>
+                    <label><input type="radio" name="rh1" value="3"> 3</label>
+                    <label><input type="radio" name="rh1" value="4"> 4</label>
+                    <label><input type="radio" name="rh1" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>2. Control de dirección al hablar:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="rh2" value="1" required> 1</label>
+                    <label><input type="radio" name="rh2" value="2"> 2</label>
+                    <label><input type="radio" name="rh2" value="3"> 3</label>
+                    <label><input type="radio" name="rh2" value="4"> 4</label>
+                    <label><input type="radio" name="rh2" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>3. Manejo de trabajar con el estrés:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="rh3" value="1" required> 1</label>
+                    <label><input type="radio" name="rh3" value="2"> 2</label>
+                    <label><input type="radio" name="rh3" value="3"> 3</label>
+                    <label><input type="radio" name="rh3" value="4"> 4</label>
+                    <label><input type="radio" name="rh3" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>4. Agilidad en la computación:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="rh4" value="1" required> 1</label>
+                    <label><input type="radio" name="rh4" value="2"> 2</label>
+                    <label><input type="radio" name="rh4" value="3"> 3</label>
+                    <label><input type="radio" name="rh4" value="4"> 4</label>
+                    <label><input type="radio" name="rh4" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>5. ¿Qué tan responsable eres?:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="rh5" value="1" required> 1</label>
+                    <label><input type="radio" name="rh5" value="2"> 2</label>
+                    <label><input type="radio" name="rh5" value="3"> 3</label>
+                    <label><input type="radio" name="rh5" value="4"> 4</label>
+                    <label><input type="radio" name="rh5" value="5"> 5</label>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- LOGÍSTICA -->
+        <fieldset>
+            <legend>Logística</legend>
+            <div class="question">
+                <label>1. ¿Qué tan ordenado eres?:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="l1" value="1" required> 1</label>
+                    <label><input type="radio" name="l1" value="2"> 2</label>
+                    <label><input type="radio" name="l1" value="3"> 3</label>
+                    <label><input type="radio" name="l1" value="4"> 4</label>
+                    <label><input type="radio" name="l1" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>2. ¿Qué tan familiarizado estás con hacer un inventario?:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="l2" value="1" required> 1</label>
+                    <label><input type="radio" name="l2" value="2"> 2</label>
+                    <label><input type="radio" name="l2" value="3"> 3</label>
+                    <label><input type="radio" name="l2" value="4"> 4</label>
+                    <label><input type="radio" name="l2" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>3. ¿Cómo está tu pensamiento crítico?:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="l3" value="1" required> 1</label>
+                    <label><input type="radio" name="l3" value="2"> 2</label>
+                    <label><input type="radio" name="l3" value="3"> 3</label>
+                    <label><input type="radio" name="l3" value="4"> 4</label>
+                    <label><input type="radio" name="l3" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>4. ¿Qué tan bueno eres para dar indicaciones y obedecerlas?:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="l4" value="1" required> 1</label>
+                    <label><input type="radio" name="l4" value="2"> 2</label>
+                    <label><input type="radio" name="l4" value="3"> 3</label>
+                    <label><input type="radio" name="l4" value="4"> 4</label>
+                    <label><input type="radio" name="l4" value="5"> 5</label>
+                </div>
+            </div>
+            <div class="question">
+                <label>5. ¿Qué tan bueno eres en el control de calidad?:</label>
+                <div class="options-scale">
+                    <label><input type="radio" name="l5" value="1" required> 1</label>
+                    <label><input type="radio" name="l5" value="2"> 2</label>
+                    <label><input type="radio" name="l5" value="3"> 3</label>
+                    <label><input type="radio" name="l5" value="4"> 4</label>
+                    <label><input type="radio" name="l5" value="5"> 5</label>
+                </div>
+            </div>
+        </fieldset>
+
+        <button type="submit">Enviar y Guardar Respuesta</button>
+    </form>
+
+    <!-- APARTADO DE RESPUESTAS GUARDADAS -->
+    <hr style="margin: 40px 0;">
+    <h2>Apartado de Registros Guardados</h2>
+    <p>Aquí se muestran las respuestas acumuladas junto con sus puntos por categoría:</p>
+    
+    <div style="overflow-x: auto;">
+        <table id="tablaResultados">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>No. Control</th>
+                    <th>Carrera</th>
+                    <th>Motivo</th>
+                    <th>¿Quién mandó?</th>
+                    <th>Turno</th>
+                    <th>Celular</th>
+                    <th>Mkt</th>
+                    <th>Fin</th>
+                    <th>RH</th>
+                    <th>Log</th>
+                    <th>Total</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los registros se cargan dinámicamente aquí -->
+            </tbody>
+        </table>
+    </div>
+
+    <button type="button" class="btn-export" onclick="exportarCSV()">Exportar Resultados a CSV</button>
+    <button type="button" class="btn-clear-all" onclick="borrarTodo()">Borrar Todos los Registros</button>
+</div>
+
+<script>
+    // 2. Configurar la conexión a Supabase
+    // Reemplaza 'TU_SUPABASE_URL' y 'TU_SUPABASE_ANON_KEY' con tus credenciales reales
+    const SUPABASE_URL = "TU_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "TU_SUPABASE_ANON_KEY";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Cargar datos de Supabase al iniciar la página
+    document.addEventListener("DOMContentLoaded", cargarRegistros);
+
+    // Enviar formulario
+    document.getElementById("evalForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const mkt = sumarGrupo("m", 5);
+        const fin = sumarGrupo("f", 4);
+        const rh = sumarGrupo("rh", 5);
+        const log = sumarGrupo("l", 5);
+        const totalScore = mkt + fin + rh + log;
+
+        const nuevoRegistro = {
+            nombre: document.getElementById("nombre").value,
+            control: document.getElementById("control").value,
+            carrera: document.getElementById("carrera").value,
+            motivo: document.getElementById("motivo").value,
+            quien_mando: document.getElementById("quienMando").value,
+            turno: document.getElementById("turno").value,
+            celular: document.getElementById("celular").value,
+            marketing: mkt,
+            finanzas: fin,
+            rh: rh,
+            logistica: log,
+            total: totalScore
+        };
+
+        // Insertar en la tabla 'evaluaciones' de Supabase
+        const { error } = await supabaseClient
+            .from('evaluaciones')
+            .insert([nuevoRegistro]);
+
+        if (error) {
+            console.error("Error al guardar:", error.message);
+            alert("Hubo un error al guardar el registro en la base de datos.");
+            return;
+        }
+
+        cargarRegistros();
+        this.reset();
+        alert("¡Registro guardado exitosamente en Supabase!");
+    });
+
+    function sumarGrupo(prefix, count) {
+        let suma = 0;
+        for (let i = 1; i <= count; i++) {
+            const ele = document.querySelector(`input[name="${prefix}${i}"]:checked`);
+            if (ele) suma += parseInt(ele.value);
+        }
+        return suma;
+    }
+
+    // Cargar registros desde Supabase
+    async function cargarRegistros() {
+        const tbody = document.querySelector("#tablaResultados tbody");
+        tbody.innerHTML = "<tr><td colspan='13'>Cargando registros...</td></tr>";
+
+        const { data: registros, error } = await supabaseClient
+            .from('evaluaciones')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            console.error("Error al cargar:", error.message);
+            tbody.innerHTML = "<tr><td colspan='13'>Error al cargar los datos.</td></tr>";
+            return;
+        }
+
+        tbody.innerHTML = "";
+
+        if (!registros || registros.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='13'>No hay registros guardados.</td></tr>";
+            return;
+        }
+
+        registros.forEach(reg => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${reg.nombre}</td>
+                <td>${reg.control}</td>
+                <td>${reg.carrera}</td>
+                <td>${reg.motivo}</td>
+                <td>${reg.quien_mando}</td>
+                <td>${reg.turno}</td>
+                <td>${reg.celular}</td>
+                <td>${reg.marketing}</td>
+                <td>${reg.finanzas}</td>
+                <td>${reg.rh}</td>
+                <td>${reg.logistica}</td>
+                <td><strong>${reg.total}</strong></td>
+                <td><button class="btn-delete" onclick="eliminarRegistro(${reg.id})">Eliminar</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Eliminar un registro por ID
+    async function eliminarRegistro(id) {
+        if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
+            const { error } = await supabaseClient
+                .from('evaluaciones')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                alert("Error al eliminar el registro.");
+                console.error(error);
+                return;
+            }
+            cargarRegistros();
+        }
+    }
+
+    // Borrar todos los registros
+    async function borrarTodo() {
+        if (confirm("¿Estás seguro de eliminar TODOS los registros de la base de datos? Esta acción no se puede deshacer.")) {
+            // Nota: Para borrar toda la tabla en Supabase sin un filtro se requiere una condición verdadera (ej. id > 0)
+            const { error } = await supabaseClient
+                .from('evaluaciones')
+                .delete()
+                .neq('id', 0); 
+
+            if (error) {
+                alert("Error al limpiar los registros.");
+                console.error(error);
+                return;
+            }
+            cargarRegistros();
+        }
+    }
+
+    // Exportar a CSV consultando directo los datos en la tabla cargada o haciendo un fetch
+    async function exportarCSV() {
+        const { data: registros, error } = await supabaseClient
+            .from('evaluaciones')
+            .select('*');
+
+        if (error || !registros || registros.length === 0) {
+            alert("No hay registros para exportar o ocurrió un error.");
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Nombre,No. Control,Carrera,Motivo,Quien Mando,Turno,Celular,Marketing,Finanzas,RH,Logistica,Total\n";
+
+        registros.forEach(reg => {
+            let row = [
+                `"${reg.nombre}"`,
+                `"${reg.control}"`,
+                `"${reg.carrera}"`,
+                `"${reg.motivo}"`,
+                `"${reg.quien_mando}"`,
+                `"${reg.turno}"`,
+                `"${reg.celular}"`,
+                reg.marketing,
+                reg.finanzas,
+                reg.rh,
+                reg.logistica,
+                reg.total
+            ];
+            csvContent += row.join(",") + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "resultados_cuestionario_supabase.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
