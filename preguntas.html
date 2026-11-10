@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cuestionario de Evaluación por Áreas (Supabase)</title>
     <!-- 1. Importar el cliente de Supabase desde CDN -->
-    <script src="https://avousasvxaedvdhkioqe.supabase.co"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -421,8 +421,8 @@
 <script>
     // 2. Configurar la conexión a Supabase
     // Reemplaza 'TU_SUPABASE_URL' y 'TU_SUPABASE_ANON_KEY' con tus credenciales reales
-    const SUPABASE_URL = "TU_SUPABASE_URL";
-    const SUPABASE_ANON_KEY = "TU_SUPABASE_ANON_KEY";
+    const SUPABASE_URL = "https://avousasvxaedvdhkioqe.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OU86BdV4Pgx300CLssg2iw_qj38-DRP";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Cargar datos de Supabase al iniciar la página
